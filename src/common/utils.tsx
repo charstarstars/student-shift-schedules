@@ -20,3 +20,21 @@ export const getDayOfWeekString = (day: DayOfWeek) => {
       return "";
   }
 };
+
+interface ShiftTimeProps {
+  startTime: number;
+  endTime: number;
+}
+
+const getHourFromTimeNumber = (timeNumber: number) => {
+  const timeNumberMilitary = timeNumber / 100;
+  const hourNumber = timeNumberMilitary > 12 ? timeNumberMilitary - 12 : timeNumberMilitary;
+  return hourNumber;
+}
+export const ShiftTime: React.FC<ShiftTimeProps> = ({ startTime, endTime }) => {
+  const start = `${getHourFromTimeNumber(startTime)}${startTime < 1200 ? "am" : "pm"
+    }`;
+  const end = `${getHourFromTimeNumber(endTime)}${endTime < 1200 ? "am" : "pm"
+    }`;
+  return <span>{start} - {end}</span>
+}

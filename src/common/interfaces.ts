@@ -26,3 +26,21 @@ export interface Student {
   lastName: string;
   maxShiftsPerWeek: number;
 }
+
+export interface StartEndTime {
+  startTime: number;
+  endTime: number;
+}
+
+export interface ShiftSchedule {
+  schedule: Array<{ shift: Shift; student: Student }>;
+  shiftToStudentPreference: Map<ShiftDayTime, Student[]>;
+  studentShifts: Map<Student, Shift[]>;
+}
+
+export interface StudentSelectionContextProps {
+  hoveredStudent?: Student;
+  setHoveredStudent: React.Dispatch<Student | undefined>;
+  selectedStudent?: Student;
+  setSelectedStudent: React.Dispatch<Student | undefined>;
+}

@@ -1,3 +1,5 @@
+
+import React, { useContext } from "react";
 import {
   Box,
   Table,
@@ -6,42 +8,48 @@ import {
   TableHead,
   TableRow
 } from "@mui/material";
-import { getDayOfWeekString } from "common/utils";
-import { Center, DayOfWeek, Shift, Student } from "common/interfaces";
-import { StudentBadge } from "components/StudentBadge";
-import React from "react";
+import { lightBlue } from "@mui/material/colors";
+
 import { daysOfOperation, shiftTimes } from "common/config";
+import { getDayOfWeekString } from "common/utils";
+import { Center, DayOfWeek, Shift, Student, ShiftSchedule } from "common/interfaces";
+import { StudentBadge } from "components/StudentBadge";
+import { StudentSelectionContext } from "common/contexts/StudentSelectionContext";
+
 
 interface CenterScheduleProps {
-  shifts: Array<{ shift: Shift; student: Student }>;
+  shiftSchedule: ShiftSchedule;
   centerName: Center;
-  hoveredStudent?: Student;
-  setHoveredStudent: React.Dispatch<Student | undefined>;
-  selectedStudent?: Student;
-  setSelectedStudent: React.Dispatch<Student | undefined>;
 }
 export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
-  const shiftsForThisCenter = props.shifts.filter((shift) => {
+  const { selectedStudent } = useContext(StudentSelectionContext)
+
+  const { shiftToStudentPreference } = props.shiftSchedule;
+  const shiftsForThisCenter = props.shiftSchedule.schedule.filter((shift) => {
     return shift.shift.location === props.centerName;
   });
-  const { hoveredStudent, setHoveredStudent, selectedStudent, setSelectedStudent } = props;
 
-  const map: Map<DayOfWeek, Map<number, Student>> = new Map();
+  const map: Map<DayOfWeek, Map<number, { shift: Shift, student: Student }>> = new Map();
 
-  shiftsForThisCenter.forEach(({ shift, student }) => {
-    const { startTime, day } = shift.dayTime;
+  shiftsForThisCenter.forEach((shift) => {
+    const { startTime, day } = shift.shift.dayTime;
     if (!map.has(day)) {
       map.set(day, new Map());
     }
     const dayMap = map.get(day);
-    dayMap?.set(startTime, student);
+    dayMap?.set(startTime, shift);
   });
 
   const table = (
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell></TableCell>
+          <TableCell sx={{
+            fontSize: 24,
+            fontWeight: 700,
+          }}>
+            {props.centerName}
+          </TableCell>
           {daysOfOperation.map((day) => {
             return <TableCell key={day}>{getDayOfWeekString(day)}</TableCell>;
           })}
@@ -59,14 +67,21 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
                 {start} - {end}
               </TableCell>
               {daysOfOperation.map((day) => {
+
+                const shift = map.get(day)?.get(shiftTime.startTime);
+                const studentsWhoPreferShift = shift?.shift.dayTime
+                  && shiftToStudentPreference.get(shift.shift.dayTime);
+                const doesSelectedStudentPreferShift = selectedStudent
+                  && studentsWhoPreferShift
+                  && shift?.student
+                  && studentsWhoPreferShift.includes(selectedStudent);
+
                 return (
-                  <TableCell key={day}>
+                  <TableCell key={day} sx={doesSelectedStudentPreferShift ? {
+                    backgroundColor: lightBlue[50],
+                  } : undefined}>
                     <StudentBadge
-                      student={map.get(day)?.get(shiftTime.startTime)}
-                      hoveredStudent={hoveredStudent}
-                      setHoveredStudent={setHoveredStudent}
-                      selectedStudent={selectedStudent}
-                      setSelectedStudent={setSelectedStudent}
+                      student={shift?.student}
                     />
                   </TableCell>
                 );
@@ -82,7 +97,6 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
     <Box sx={{
       marginY: 16,
     }}>
-      <h2>{props.centerName}</h2>
       {table}
     </Box>
   );

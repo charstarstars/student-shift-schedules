@@ -45,20 +45,20 @@ const studentShiftPreferences: StudentShiftPreference[] = [
     shiftPreferences: new Set([hoursOfOperation[0], hoursOfOperation[2]])
   },
   {
+    student: deskReceptionists[1],
+    shiftPreferences: new Set([hoursOfOperation[0], hoursOfOperation[1]])
+  },
+  {
     student: deskReceptionists[2],
     shiftPreferences: new Set([hoursOfOperation[0], hoursOfOperation[2]])
   },
   {
     student: deskReceptionists[3],
-    shiftPreferences: new Set([hoursOfOperation[6], hoursOfOperation[8]])
+    shiftPreferences: new Set([hoursOfOperation[6], hoursOfOperation[7]])
   },
   {
     student: deskReceptionists[4],
-    shiftPreferences: new Set([hoursOfOperation[10], hoursOfOperation[7]])
-  },
-  {
-    student: deskReceptionists[1],
-    shiftPreferences: new Set([hoursOfOperation[0], hoursOfOperation[1]])
+    shiftPreferences: new Set([hoursOfOperation[4], hoursOfOperation[5]])
   }
 ];
 
@@ -74,32 +74,30 @@ const populateShiftStudentPreferenceMap = () => {
   // add students to map
   studentShiftPreferences.forEach(({ student, shiftPreferences }) => {
     studentToPreferences.set(student, shiftPreferences);
-    shiftPreferences.forEach((shiftPreference) => {
+    for (const shiftPreference of shiftPreferences) {
       const students = map.get(shiftPreference);
+
       if (students) {
         students.push(student);
       } else {
         map.set(shiftPreference, [student]);
       }
-    });
+    }
   });
 
   // sort the students by number of shifts they can take
-  for (const [_, students] of map.entries()) {
+  map.forEach((students) => {
     students.sort((a, b) => {
       const aSize = studentToPreferences.get(a)?.size ?? 0;
       const bSize = studentToPreferences.get(b)?.size ?? 0;
       return bSize - aSize;
     });
-  }
+  });
+
 
   return map;
 };
 
-const shiftToStudentPreference: Map<
-  ShiftDayTime,
-  Student[]
-> = populateShiftStudentPreferenceMap();
 
 // fill out schedule
 export const createSchedule = () => {
@@ -108,6 +106,11 @@ export const createSchedule = () => {
     shift: Shift;
     student: Student;
   }> = [];
+
+  const shiftToStudentPreference: Map<
+    ShiftDayTime,
+    Student[]
+  > = populateShiftStudentPreferenceMap();
 
   // go through Map<Shift, Students> , sort shifts by fewest number of students, set those first
   const sortedShifts = [...hoursOfOperation].sort(
@@ -126,13 +129,16 @@ export const createSchedule = () => {
   //    add them to the location-shifttime
   //    if the student has maxed out their shifts, remove them from subsequent sets??
 
+  // For each student, what are their assigned shifts?
+  const studentShifts: Map<Student, Shift[]> = new Map();
+  // initialize map with all student receptionists
+  deskReceptionists.forEach((deskReceptionist) => {
+    studentShifts.set(deskReceptionist, []);
+  });
+
   sortedShifts.forEach((shiftDayTime) => {
     const shiftsAvailable = availableShifts.get(shiftDayTime);
-    const studentsAvailable = shiftToStudentPreference.get(shiftDayTime);
-    const studentShifts: Map<Student, Shift[]> = new Map();
-    deskReceptionists.forEach((deskReceptionist) => {
-      studentShifts.set(deskReceptionist, []);
-    });
+    const studentsAvailable = [...shiftToStudentPreference.get(shiftDayTime)!];
 
     if (!studentsAvailable || studentsAvailable.length === 0) {
       // fill the shifts with null
@@ -162,5 +168,5 @@ export const createSchedule = () => {
       }
     }
   });
-  return schedule;
+  return { schedule, shiftToStudentPreference, studentShifts };
 };

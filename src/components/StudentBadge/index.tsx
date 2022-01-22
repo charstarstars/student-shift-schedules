@@ -1,20 +1,17 @@
+import { useContext } from "react";
 import { Chip, ChipProps } from "@mui/material";
+import { StudentSelectionContext } from "common/contexts/StudentSelectionContext";
 import { Student } from "common/interfaces";
 
 interface StudentBadgeProps {
   student?: Student;
-  hoveredStudent?: Student;
-  setHoveredStudent: React.Dispatch<Student | undefined>;
-  selectedStudent?: Student;
-  setSelectedStudent: React.Dispatch<Student | undefined>;
+
 }
 export const StudentBadge: React.FC<StudentBadgeProps> = ({
   student,
-  hoveredStudent,
-  setHoveredStudent,
-  selectedStudent,
-  setSelectedStudent
 }) => {
+  const { hoveredStudent, setHoveredStudent, selectedStudent, setSelectedStudent } = useContext(StudentSelectionContext)
+
   if (!student) {
     return null;
   }

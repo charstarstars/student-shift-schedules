@@ -1,6 +1,6 @@
-import { Center, DayOfWeek } from "common/interfaces";
+import { Center, DayOfWeek, StartEndTime } from "common/interfaces";
 
-export const shiftTimes = [
+export const shiftTimes: StartEndTime[] = [
     {
         startTime: 900,
         endTime: 1100
@@ -21,6 +21,15 @@ export const shiftTimes = [
 // const centers: Center[] = ["MCC", "PIAAA", "PAC", "MENASA", "LaCasa"];
 export const centers: Center[] = ["MCC", "PIAAA"];
 
+export const allDaysOfWeek = [
+    DayOfWeek.Sunday,
+    DayOfWeek.Monday,
+    DayOfWeek.Tuesday,
+    DayOfWeek.Wednesday,
+    DayOfWeek.Thursday,
+    DayOfWeek.Friday,
+    DayOfWeek.Saturday,
+]
 export const daysOfOperation = [
     DayOfWeek.Monday,
     DayOfWeek.Tuesday,
