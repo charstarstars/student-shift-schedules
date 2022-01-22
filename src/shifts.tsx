@@ -1,25 +1,5 @@
-import { Shift, Center, DayOfWeek, ShiftDayTime } from "./interfaces";
-
-export const shiftTimes = [
-  {
-    startTime: 900,
-    endTime: 1100
-  },
-  {
-    startTime: 1100,
-    endTime: 1300
-  },
-  {
-    startTime: 1300,
-    endTime: 1500
-  },
-  {
-    startTime: 1500,
-    endTime: 1700
-  }
-];
-// const centers: Center[] = ["MCC", "PIAAA", "PAC", "MENASA", "LaCasa"];
-export const centers: Center[] = ["MCC", "PIAAA"];
+import { centers, daysOfOperation, shiftTimes } from "common/config";
+import { Shift, Center, DayOfWeek, ShiftDayTime } from "./common/interfaces";
 
 const populateShiftDateTimes = (days: DayOfWeek[]) => {
   const shiftDateTimes: Array<ShiftDayTime> = [];
@@ -34,13 +14,6 @@ const populateShiftDateTimes = (days: DayOfWeek[]) => {
   });
   return shiftDateTimes;
 };
-export const daysOfOperation = [
-  DayOfWeek.Monday,
-  DayOfWeek.Tuesday,
-  DayOfWeek.Wednesday,
-  DayOfWeek.Thursday,
-  DayOfWeek.Friday
-];
 export const hoursOfOperation = populateShiftDateTimes(daysOfOperation);
 
 const populateShifts = () => {
@@ -56,7 +29,7 @@ const populateShifts = () => {
       )
     );
   });
-  console.log({ shiftsByShiftDayTime });
+
   return shiftsByShiftDayTime;
 };
 

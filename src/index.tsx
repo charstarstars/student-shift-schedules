@@ -1,6 +1,6 @@
 import { render } from "react-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Receptionists } from "./Receptionists";
+import { Receptionists } from "./components/Receptionists";
 
 import App from "./App";
 

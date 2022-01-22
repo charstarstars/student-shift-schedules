@@ -1,36 +1,36 @@
-import { Student, Shift, ShiftDayTime } from "./interfaces";
+import { Student, Shift, ShiftDayTime } from "common/interfaces";
 import { availableShifts, hoursOfOperation } from "./shifts";
 
-const deskReceptionists: Student[] = [
+export const deskReceptionists: Student[] = [
   {
     firstName: "Ariel",
     lastName: "Liu",
     maxShiftsPerWeek: 4,
-    psuId: 1234556
+    psuId: 1
   },
   {
     firstName: "Mek",
     lastName: "Karpeles",
     maxShiftsPerWeek: 4,
-    psuId: 1234556
+    psuId: 2
   },
   {
     firstName: "Sahar",
     lastName: "Massachi",
     maxShiftsPerWeek: 4,
-    psuId: 1234556
+    psuId: 3
   },
   {
     firstName: "Drew",
     lastName: "Winget",
     maxShiftsPerWeek: 4,
-    psuId: 1234556
+    psuId: 4
   },
   {
     firstName: "Trevor",
     lastName: "Luu",
     maxShiftsPerWeek: 4,
-    psuId: 23456
+    psuId: 5
   }
 ];
 
@@ -87,8 +87,8 @@ const populateShiftStudentPreferenceMap = () => {
   // sort the students by number of shifts they can take
   for (const [_, students] of map.entries()) {
     students.sort((a, b) => {
-      const aSize = studentToPreferences.get(a).size ?? 0;
-      const bSize = studentToPreferences.get(b).size ?? 0;
+      const aSize = studentToPreferences.get(a)?.size ?? 0;
+      const bSize = studentToPreferences.get(b)?.size ?? 0;
       return bSize - aSize;
     });
   }
@@ -138,10 +138,12 @@ export const createSchedule = () => {
       // fill the shifts with null
       return;
     }
+    if (!shiftsAvailable) {
+      return;
+    }
     for (const shift of shiftsAvailable) {
-      let student: Student;
-      while (studentsAvailable.length > 0) {
-        student = studentsAvailable.pop();
+      let student: Student | undefined;
+      while (student = studentsAvailable.pop()) {
 
         // get students currently scheduled shifts
         const thisStudentsShifts = studentShifts.get(student);

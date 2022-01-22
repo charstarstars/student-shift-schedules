@@ -1,27 +1,30 @@
 import {
+  Box,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow
 } from "@mui/material";
-import { getDayOfWeekString } from "../utils";
-import { Center, DayOfWeek, Shift, Student } from "../interfaces";
-import { daysOfOperation, shiftTimes } from "../shifts";
-import { StudentBadge } from "StudentBadge";
+import { getDayOfWeekString } from "common/utils";
+import { Center, DayOfWeek, Shift, Student } from "common/interfaces";
+import { StudentBadge } from "components/StudentBadge";
 import React from "react";
+import { daysOfOperation, shiftTimes } from "common/config";
 
 interface CenterScheduleProps {
   shifts: Array<{ shift: Shift; student: Student }>;
   centerName: Center;
   hoveredStudent?: Student;
-  setHoveredStudent: React.Dispatch<Student>;
+  setHoveredStudent: React.Dispatch<Student | undefined>;
+  selectedStudent?: Student;
+  setSelectedStudent: React.Dispatch<Student | undefined>;
 }
 export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
   const shiftsForThisCenter = props.shifts.filter((shift) => {
     return shift.shift.location === props.centerName;
   });
-  const { hoveredStudent, setHoveredStudent } = props;
+  const { hoveredStudent, setHoveredStudent, selectedStudent, setSelectedStudent } = props;
 
   const map: Map<DayOfWeek, Map<number, Student>> = new Map();
 
@@ -46,12 +49,10 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
       </TableHead>
       <TableBody>
         {shiftTimes.map((shiftTime) => {
-          const start = `${shiftTime.startTime / 100}${
-            shiftTime.startTime < 1200 ? "am" : "pm"
-          }`;
-          const end = `${shiftTime.endTime / 100}${
-            shiftTime.endTime < 1200 ? "am" : "pm"
-          }`;
+          const start = `${shiftTime.startTime / 100}${shiftTime.startTime < 1200 ? "am" : "pm"
+            }`;
+          const end = `${shiftTime.endTime / 100}${shiftTime.endTime < 1200 ? "am" : "pm"
+            }`;
           return (
             <TableRow key={`${shiftTime.startTime}-${shiftTime.endTime}`}>
               <TableCell>
@@ -59,11 +60,13 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
               </TableCell>
               {daysOfOperation.map((day) => {
                 return (
-                  <TableCell>
+                  <TableCell key={day}>
                     <StudentBadge
                       student={map.get(day)?.get(shiftTime.startTime)}
                       hoveredStudent={hoveredStudent}
                       setHoveredStudent={setHoveredStudent}
+                      selectedStudent={selectedStudent}
+                      setSelectedStudent={setSelectedStudent}
                     />
                   </TableCell>
                 );
@@ -76,10 +79,12 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
   );
 
   return (
-    <div>
+    <Box sx={{
+      marginY: 16,
+    }}>
       <h2>{props.centerName}</h2>
       {table}
-    </div>
+    </Box>
   );
 };
 
