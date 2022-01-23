@@ -11,7 +11,7 @@ import {
 import { lightBlue } from "@mui/material/colors";
 
 import { daysOfOperation, shiftTimes } from "common/config";
-import { getDayOfWeekString } from "common/utils";
+import { createDayShiftTimeStringKey, getDayOfWeekString } from "common/utils";
 import { Center, DayOfWeek, Shift, Student, ShiftSchedule } from "common/interfaces";
 import { StudentBadge } from "components/StudentBadge";
 import { StudentSelectionContext } from "common/contexts/StudentSelectionContext";
@@ -29,15 +29,16 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
     return shift.shift.location === props.centerName;
   });
 
-  const map: Map<DayOfWeek, Map<number, { shift: Shift, student: Student }>> = new Map();
+  type StartTime = number;
+  const map: Map<DayOfWeek, Map<StartTime, { shift: Shift, student: Student }>> = new Map();
 
   shiftsForThisCenter.forEach((shift) => {
-    const { startTime, day } = shift.shift.dayTime;
+    const { time, day } = shift.shift.dayTime;
     if (!map.has(day)) {
       map.set(day, new Map());
     }
     const dayMap = map.get(day);
-    dayMap?.set(startTime, shift);
+    dayMap?.set(time.startTime, shift);
   });
 
   const table = (
@@ -70,7 +71,9 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
 
                 const shift = map.get(day)?.get(shiftTime.startTime);
                 const studentsWhoPreferShift = shift?.shift.dayTime
-                  && shiftToStudentPreference.get(shift.shift.dayTime);
+                  && shiftToStudentPreference.get(
+                    createDayShiftTimeStringKey(shift.shift.dayTime.day, shift.shift.dayTime.time)
+                  );
                 const doesSelectedStudentPreferShift = selectedStudent
                   && studentsWhoPreferShift
                   && shift?.student

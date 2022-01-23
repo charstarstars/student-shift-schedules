@@ -1,4 +1,4 @@
-import { DayOfWeek } from "./interfaces";
+import { DayOfWeek, StartEndTime } from "./interfaces";
 
 export const getDayOfWeekString = (day: DayOfWeek) => {
   switch (day) {
@@ -37,4 +37,9 @@ export const ShiftTime: React.FC<ShiftTimeProps> = ({ startTime, endTime }) => {
   const end = `${getHourFromTimeNumber(endTime)}${endTime < 1200 ? "am" : "pm"
     }`;
   return <span>{start} - {end}</span>
+}
+
+export type DayTimeString = string;
+export const createDayShiftTimeStringKey = (day: DayOfWeek, time: StartEndTime) => {
+  return `${day}-${time.startTime}-${time.endTime}`;
 }

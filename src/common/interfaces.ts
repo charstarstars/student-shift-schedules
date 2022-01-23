@@ -1,3 +1,5 @@
+import { DayTimeString } from "./utils";
+
 export enum DayOfWeek {
   Sunday,
   Monday,
@@ -9,10 +11,14 @@ export enum DayOfWeek {
 }
 export type Center = "MCC" | "LaCasa" | "PIAAA" | "PAC" | "MENASA";
 
-export interface ShiftDayTime {
-  day: DayOfWeek;
+export interface StartEndTime {
   startTime: number;
   endTime: number;
+}
+
+export interface ShiftDayTime {
+  day: DayOfWeek;
+  time: StartEndTime;
 }
 
 export interface Shift {
@@ -27,14 +33,9 @@ export interface Student {
   maxShiftsPerWeek: number;
 }
 
-export interface StartEndTime {
-  startTime: number;
-  endTime: number;
-}
-
 export interface ShiftSchedule {
   schedule: Array<{ shift: Shift; student: Student }>;
-  shiftToStudentPreference: Map<ShiftDayTime, Student[]>;
+  shiftToStudentPreference: Map<DayTimeString, Student[]>;
   studentShifts: Map<Student, Shift[]>;
 }
 
