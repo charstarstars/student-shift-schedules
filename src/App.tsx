@@ -1,24 +1,29 @@
-import { useEffect, useState, useRef, useContext } from "react";
-import React from "react";
-import { Button, Container, Identity } from "@mui/material";
 
-import { CenterSchedule } from "components/CenterSchedule";
-import { createSchedule } from "./deskReceptionists";
-import { Shift, Student, StudentSelectionContextProps } from "common/interfaces";
-import { centers } from "common/config";
-import "./styles.css";
-import { StudentList } from "components/StudentList";
-import { ThemeContext } from "@emotion/react";
-import { StudentSelectionContext } from "common/contexts/StudentSelectionContext";
 import { Outlet } from "react-router-dom";
+import { Container } from "@mui/material";
 
-
+import "./styles.css";
+import { useState } from "react";
+import { Student, StudentShiftPreference } from "common/interfaces";
+import { StudentsContext } from "common/contexts/StudentsContext";
+import { deskReceptionists, studentShiftPreferences } from "data/students";
 
 export default function App() {
 
+  const [students, setStudents] = useState<Student[]>(deskReceptionists);
+  const [studentsAvailabilities, setStudentsAvailabilities] = useState<StudentShiftPreference[]>(studentShiftPreferences)
+
   return (
     <Container className="App">
-      <Outlet />
-    </Container>
+      <StudentsContext.Provider value={{
+        students,
+        setStudents,
+        studentsAvailabilities,
+        setStudentsAvailabilities
+      }}>
+        <Outlet />
+      </StudentsContext.Provider>
+
+    </Container >
   );
 }

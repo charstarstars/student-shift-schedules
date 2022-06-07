@@ -1,76 +1,11 @@
-import { shiftTimes } from "common/config";
-import { Student, Shift, ShiftDayTime, DayOfWeek, StartEndTime } from "common/interfaces";
+import { Student, Shift, ShiftDayTime, DayOfWeek, StartEndTime, StudentShiftPreference } from "common/interfaces";
 import { createDayShiftTimeStringKey, DayTimeString } from "common/utils";
 import { availableShifts, hoursOfOperation, shiftDayTimes } from "./shifts";
 
-export const deskReceptionists: Student[] = [
-  {
-    firstName: "Ariel",
-    lastName: "Liu",
-    maxShiftsPerWeek: 4,
-    psuId: 1
-  },
-  {
-    firstName: "Mek",
-    lastName: "Karpeles",
-    maxShiftsPerWeek: 4,
-    psuId: 2
-  },
-  {
-    firstName: "Sahar",
-    lastName: "Massachi",
-    maxShiftsPerWeek: 4,
-    psuId: 3
-  },
-  {
-    firstName: "Drew",
-    lastName: "Winget",
-    maxShiftsPerWeek: 4,
-    psuId: 4
-  },
-  {
-    firstName: "Trevor",
-    lastName: "Luu",
-    maxShiftsPerWeek: 4,
-    psuId: 5
-  }
-];
 
-interface StudentShiftPreference {
-  student: Student;
-  shiftPreferences: Map<DayOfWeek, StartEndTime[]>;
-}
-
-const studentShiftPreferences: StudentShiftPreference[] = [
-  {
-    student: deskReceptionists[0],
-    shiftPreferences: new Map([[DayOfWeek.Monday, [shiftTimes[0], shiftTimes[1]]]])
-  },
-  {
-    student: deskReceptionists[1],
-    shiftPreferences: new Map([[DayOfWeek.Tuesday, [shiftTimes[0], shiftTimes[1]]]])
-  },
-  {
-    student: deskReceptionists[2],
-    shiftPreferences: new Map([[DayOfWeek.Wednesday, [shiftTimes[0], shiftTimes[1]]]])
-  },
-  {
-    student: deskReceptionists[3],
-    shiftPreferences: new Map([[DayOfWeek.Monday, [shiftTimes[0], shiftTimes[2]]]])
-  },
-  {
-    student: deskReceptionists[4],
-    shiftPreferences: new Map([
-      [DayOfWeek.Monday, [shiftTimes[0], shiftTimes[1]]],
-      [DayOfWeek.Wednesday, [shiftTimes[2], shiftTimes[3]]]
-    ])
-  }
-];
-
-
-const populateShiftStudentPreferenceMap = () => {
+const populateShiftStudentPreferenceMap = (studentShiftPreferences: StudentShiftPreference[]) => {
   const map = new Map<DayTimeString, Student[]>();
-  const studentToPreferences = new Map<Student, Map<DayOfWeek, StartEndTime[]>>();
+  const studentToPreferences = new Map<Student, StartEndTime[][]>();
 
   // put all the shifts into the map with empty set of students
   hoursOfOperation.forEach((times, day) => {
@@ -83,7 +18,8 @@ const populateShiftStudentPreferenceMap = () => {
   studentShiftPreferences.forEach(({ student, shiftPreferences }) => {
     studentToPreferences.set(student, shiftPreferences);
 
-    for (const [day, times] of shiftPreferences) {
+    shiftPreferences.forEach((times, day) => {
+      // console.log(times);
       times.forEach((time) => {
         const dayTimeMapKey = createDayShiftTimeStringKey(day, time);
         const students = map.get(dayTimeMapKey);
@@ -94,14 +30,14 @@ const populateShiftStudentPreferenceMap = () => {
           map.set(dayTimeMapKey, [student]);
         }
       })
-    }
+    })
   });
 
   // sort the students by number of shifts they can take
   map.forEach((students) => {
     students.sort((a, b) => {
-      const aSize = studentToPreferences.get(a)?.size ?? 0;
-      const bSize = studentToPreferences.get(b)?.size ?? 0;
+      const aSize = studentToPreferences.get(a)?.length ?? 0;
+      const bSize = studentToPreferences.get(b)?.length ?? 0;
       return bSize - aSize;
     });
   });
@@ -112,14 +48,14 @@ const populateShiftStudentPreferenceMap = () => {
 
 
 // fill out schedule
-export const createSchedule = () => {
+export const createSchedule = (students: Student[], studentShiftPreferences: StudentShiftPreference[]) => {
   // schedule is a list of [shift, student] pairs
   const schedule: Array<{
     shift: Shift;
     student: Student;
   }> = [];
 
-  const shiftToStudentPreference = populateShiftStudentPreferenceMap();
+  const shiftToStudentPreference = populateShiftStudentPreferenceMap(studentShiftPreferences);
 
   // go through Map<Shift, Students> , sort shifts by fewest number of students, set those first
   const sortedShifts = [...shiftDayTimes.values()].sort(
@@ -141,7 +77,7 @@ export const createSchedule = () => {
   // For each student, what are their assigned shifts?
   const studentShifts: Map<Student, Shift[]> = new Map();
   // initialize map with all student receptionists
-  deskReceptionists.forEach((deskReceptionist) => {
+  students.forEach((deskReceptionist) => {
     studentShifts.set(deskReceptionist, []);
   });
 

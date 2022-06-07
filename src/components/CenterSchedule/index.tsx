@@ -97,9 +97,7 @@ export const CenterSchedule: React.FC<CenterScheduleProps> = (props) => {
   );
 
   return (
-    <Box sx={{
-      marginY: 16,
-    }}>
+    <Box marginY={2}>
       {table}
     </Box>
   );

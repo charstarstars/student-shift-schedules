@@ -1,10 +1,11 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, Checkbox, Switch, Button, Box } from "@mui/material";
 import { lightBlue } from "@mui/material/colors";
 import { allDaysOfWeek, daysOfOperation, shiftTimes } from "common/config";
+import { StudentsContext } from "common/contexts/StudentsContext";
 import { ShiftDayTime, Student, StartEndTime, DayOfWeek } from "common/interfaces";
 import { getDayOfWeekString, ShiftTime } from "common/utils";
-import { deskReceptionists } from "deskReceptionists";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 interface StudentAvailabilityProps {
@@ -17,19 +18,45 @@ function initializeShiftDayTimeArray<T>() {
 
 export const StudentAvailabilityPage: React.FC<{}> = () => {
     let { studentId } = useParams();
-    const student = deskReceptionists.find((s) => {
+    const { students } = useContext(StudentsContext);
+
+    const student = students.find((s) => {
         return studentId === "" + s.psuId
     })
+
     if (!student) {
         // Didn't find student with this id
         return <></>;
     }
-    return <StudentAvailability student={student} />
+    return <div>
+        <h1>Student Schedule {student.firstName}</h1>
+        <StudentAvailability student={student} />
+    </div>
 }
 
 export const StudentAvailability: React.FC<StudentAvailabilityProps> = ({ student }) => {
     const [selectedShifts, setSelectedShifts] = useState<StartEndTime[][]>(initializeShiftDayTimeArray<StartEndTime>());
+    const { studentsAvailabilities } = useContext(StudentsContext)
+    useEffect(() => {
+        const thisStudentAvailability = studentsAvailabilities.find(({ student: s, shiftPreferences }) => {
+            return s.psuId === student.psuId;
+        })
+        if (thisStudentAvailability) {
+            const { shiftPreferences } = thisStudentAvailability;
+            setSelectedShifts(shiftPreferences);
+        }
+    }, [student.psuId, studentsAvailabilities])
+    return <StudentAvailabilityStateless selectedShifts={selectedShifts} setSelectedShifts={setSelectedShifts} />;
+}
 
+interface StudentAvailabilityStatelessProps {
+    selectedShifts: StartEndTime[][];
+    setSelectedShifts: React.Dispatch<StartEndTime[][]>;
+}
+export const StudentAvailabilityStateless: React.FC<StudentAvailabilityStatelessProps> = ({
+    selectedShifts,
+    setSelectedShifts
+}) => {
     const onCheckboxClick = (day: DayOfWeek, shiftTime: StartEndTime) => () => {
         const locatedShiftTimeIndex = selectedShifts[day].indexOf(shiftTime)
         const isSelected = locatedShiftTimeIndex >= 0;
@@ -45,7 +72,7 @@ export const StudentAvailability: React.FC<StudentAvailabilityProps> = ({ studen
         setSelectedShifts(nextSelectedShifts);
     }
 
-    const hoursOfOperationTable = <Table>
+    const hoursOfOperationTable = <Table size="small">
         <TableHead>
             <TableRow>
                 <TableCell>
@@ -77,11 +104,11 @@ export const StudentAvailability: React.FC<StudentAvailabilityProps> = ({ studen
         </TableBody>
     </Table>
     return <div>
-        <h1>Student Schedule {student.firstName}</h1>
         <Box sx={{
-            marginY: 10,
+            marginY: 2,
         }}>
             {hoursOfOperationTable}
         </Box>
     </div>
 }
+

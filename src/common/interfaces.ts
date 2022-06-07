@@ -45,3 +45,17 @@ export interface StudentSelectionContextProps {
   selectedStudent?: Student;
   setSelectedStudent: React.Dispatch<Student | undefined>;
 }
+
+
+export interface StudentShiftPreference {
+  student: Student;
+  // access is shiftPreference[DayOfWeek][shiftNumber]
+  shiftPreferences: StartEndTime[][];
+}
+
+export interface StudentsContextProps {
+  students: Student[];
+  setStudents: React.Dispatch<Student[]>;
+  studentsAvailabilities: StudentShiftPreference[];
+  setStudentsAvailabilities: React.Dispatch<StudentShiftPreference[]>;
+}
