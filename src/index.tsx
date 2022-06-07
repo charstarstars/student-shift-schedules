@@ -1,6 +1,6 @@
 import { render } from "react-dom";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { Receptionists } from "./components/Receptionists";
+import { AddReceptionistsPage, ReceptionistsPage } from "./components/Receptionists";
 
 import App from "./App";
 import { StudentAvailabilityPage } from "components/StudentAvailability";
@@ -14,7 +14,8 @@ render(
         <Route index element={<ShiftScheduleView />} />
         <Route path="receptionists" >
           <Route path=":studentId" element={<StudentAvailabilityPage />} />
-          <Route index element={<Receptionists />} />
+          <Route path="add" element={<AddReceptionistsPage />} />
+          <Route index element={<ReceptionistsPage />} />
         </Route>
       </Route>
     </Routes>
